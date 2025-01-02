@@ -1,12 +1,8 @@
 version: "3.8"
 services:
   quiz-service:
-    build: .
+    image: arunsinghsaab/quiz-service
     ports:
       - "3000:3000"
     environment:
       - PORT=3000
-    volumes:
-      - .:/app
-      - /app/node_modules
-    command: npm start
