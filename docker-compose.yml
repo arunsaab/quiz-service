@@ -6,3 +6,26 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
+      - NODE_ENV=development # Set the environment to development by default
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  test:
+    image: arunsinghsaab/quiz-service # You can also use the same image for tests
+    command: npm test # Run the tests on container startup
+    environment:
+      - PORT=3000
+      - NODE_ENV=test # Set the environment to test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - quiz-service # Ensure quiz-service is up before running tests
+    networks:
+      - default # Use the same network for communication if necessary
+
+networks:
+  default:
+    driver: bridge # Default network driver
+

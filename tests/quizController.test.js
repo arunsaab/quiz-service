@@ -12,6 +12,7 @@ jest.mock("../src/models/quizModel", () => quizzes);
 // Routes
 app.post("/api/quizzes", quizController.createQuiz);
 app.get("/api/quizzes/:id", quizController.getQuiz);
+app.get("/api/quizzes/", quizController.getAllQuizzes);
 
 describe("Quiz API", () => {
   // Reset quizzes array before each test
@@ -144,6 +145,72 @@ describe("Quiz API", () => {
 
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("error", "Quiz not found.");
+    });
+  });
+
+  const mockQuizzes = [
+    {
+      id: 1,
+      title: "Sample Quiz 1",
+      questions: [
+        {
+          id: 1,
+          text: "Sample Question 1",
+          options: ["Option A", "Option B", "Option C", "Option D"]
+        },
+        {
+          id: 2,
+          text: "Sample Question 2",
+          options: ["Option A", "Option B", "Option C", "Option D"]
+        }
+      ]
+    },
+    {
+      id: 2,
+      title: "Sample Quiz 2",
+      questions: [
+        {
+          id: 1,
+          text: "Sample Question 1",
+          options: ["Option A", "Option B", "Option C", "Option D"]
+        }
+      ]
+    }
+  ];
+
+  describe("GET /api/quizzes", () => {
+    // Mocking the quizzes data
+    beforeEach(() => {
+      quizzes.length = 0; // Clear the quizzes array before each test
+    });
+
+    it("should return all quizzes without answers", async () => {
+      // Arrange: Add mock quizzes to the array
+      quizzes.push(...mockQuizzes);
+
+      // Act: Call the API to get all quizzes
+      const res = await request(app).get("/api/quizzes");
+
+      // Assert: Check the response status and structure
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(2); // We expect two quizzes
+      expect(res.body[0]).toHaveProperty("id", 1);
+      expect(res.body[0]).toHaveProperty("title", "Sample Quiz 1");
+      expect(res.body[0].questions[0]).not.toHaveProperty("correct_option"); // Questions without correct_option
+      expect(res.body[0].questions[0]).toHaveProperty(
+        "text",
+        "Sample Question 1"
+      );
+      expect(res.body[0].questions[0]).toHaveProperty("options");
+    });
+
+    it("should return 404 if no quizzes are found", async () => {
+      // Act: Call the API to get quizzes when the array is empty
+      const res = await request(app).get("/api/quizzes");
+
+      // Assert: The response should return a 404 status with a 'No quizzes found' message
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("message", "No quizzes found.");
     });
   });
 });
